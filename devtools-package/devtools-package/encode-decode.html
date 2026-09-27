@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Encoder / Decoder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  --error:#e5484d; --success:#4caf7d;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:28px 24px 18px; border-bottom:1px solid var(--border); position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.col h2{font-size:.72rem; color:var(--muted); font-weight:500; margin:0 0 8px; display:flex; justify-content:space-between; align-items:center;}
+.col h2 button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;}
+.col h2 button:hover{color:var(--text);border-color:var(--muted);}
+textarea, pre.output{
+  width:100%; height:340px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.55;
+  padding:14px; resize:vertical; overflow:auto; white-space:pre-wrap; word-break:break-word;
+}
+pre.output{margin:0;}
+textarea:focus{outline:none; border-color:var(--accent);}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem; padding:10px 18px; border-radius:7px; cursor:pointer;}
+button.primary:hover{background:#f0b559;}
+button.ghost{background:none; border:1px solid var(--border); color:var(--text); font:inherit; font-size:.85rem; padding:10px 16px; border-radius:7px; cursor:pointer;}
+button.ghost:hover{border-color:var(--muted);}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace;}
+.status.ok{color:var(--success);}
+.status.err{color:var(--error);}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>Encoder / Decoder</h1></div>
+  <p class="sub">Base64, URL, dan HTML entity — encode &amp; decode langsung di browser, tanpa data terkirim ke server.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="base64">Base64</button>
+    <button data-tab="url">URL</button>
+    <button data-tab="html">HTML Entity</button>
+  </nav>
+
+  <!-- BASE64 -->
+  <section class="panel active" id="base64">
+    <div class="grid">
+      <div class="col">
+        <h2>Input <button onclick="loadSample('base64')">contoh</button></h2>
+        <textarea id="base64-in" placeholder="Ketik atau tempel teks di sini..."></textarea>
+      </div>
+      <div class="col">
+        <h2>Output <button onclick="copyOut('base64-out')">salin</button></h2>
+        <pre class="output" id="base64-out"></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runB64('encode')">Encode</button>
+      <button class="ghost" onclick="runB64('decode')">Decode</button>
+      <span class="status" id="base64-status"></span>
+    </div>
+  </section>
+
+  <!-- URL -->
+  <section class="panel" id="url">
+    <div class="grid">
+      <div class="col">
+        <h2>Input <button onclick="loadSample('url')">contoh</button></h2>
+        <textarea id="url-in" placeholder="https://contoh.com/cari?q=kopi susu"></textarea>
+      </div>
+      <div class="col">
+        <h2>Output <button onclick="copyOut('url-out')">salin</button></h2>
+        <pre class="output" id="url-out"></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runUrl('encode')">Encode</button>
+      <button class="ghost" onclick="runUrl('decode')">Decode</button>
+      <span class="status" id="url-status"></span>
+    </div>
+  </section>
+
+  <!-- HTML -->
+  <section class="panel" id="html">
+    <div class="grid">
+      <div class="col">
+        <h2>Input <button onclick="loadSample('html')">contoh</button></h2>
+        <textarea id="html-in" placeholder="<p>Halo & selamat datang</p>"></textarea>
+      </div>
+      <div class="col">
+        <h2>Output <button onclick="copyOut('html-out')">salin</button></h2>
+        <pre class="output" id="html-out"></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runHtml('encode')">Encode</button>
+      <button class="ghost" onclick="runHtml('decode')">Decode</button>
+      <span class="status" id="html-status"></span>
+    </div>
+  </section>
+</main>
+<footer>Diproses sepenuhnya di sisi klien — teks Anda tidak pernah meninggalkan perangkat.</footer>
+
+<script>
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+const SAMPLES = {
+  base64: 'Selamat datang di Bandung!',
+  url: 'https://contoh.com/cari?q=kopi susu&kota=Bandung',
+  html: '<p>Halo & selamat datang, "kawan"!</p>'
+};
+function loadSample(tab){ document.getElementById(tab+'-in').value = SAMPLES[tab]; }
+
+function setStatus(id, ok, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + (ok?'ok':'err');
+}
+
+function runB64(mode){
+  const inEl = document.getElementById('base64-in');
+  const out = document.getElementById('base64-out');
+  try{
+    if(mode==='encode'){
+      const bytes = new TextEncoder().encode(inEl.value);
+      let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
+      out.textContent = btoa(bin);
+    } else {
+      const bin = atob(inEl.value.trim());
+      const bytes = Uint8Array.from(bin, c=>c.charCodeAt(0));
+      out.textContent = new TextDecoder().decode(bytes);
+    }
+    setStatus('base64-status', true, mode==='encode' ? 'Berhasil encode ✓' : 'Berhasil decode ✓');
+  }catch(e){
+    out.textContent='';
+    setStatus('base64-status', false, 'Error: string Base64 tidak valid.');
+  }
+}
+
+function runUrl(mode){
+  const inEl = document.getElementById('url-in');
+  const out = document.getElementById('url-out');
+  try{
+    out.textContent = mode==='encode' ? encodeURIComponent(inEl.value) : decodeURIComponent(inEl.value);
+    setStatus('url-status', true, mode==='encode' ? 'Berhasil encode ✓' : 'Berhasil decode ✓');
+  }catch(e){
+    out.textContent='';
+    setStatus('url-status', false, 'Error: format tidak valid untuk decode.');
+  }
+}
+
+function runHtml(mode){
+  const inEl = document.getElementById('html-in');
+  const out = document.getElementById('html-out');
+  if(mode==='encode'){
+    const div = document.createElement('div');
+    div.textContent = inEl.value;
+    out.textContent = div.innerHTML;
+    setStatus('html-status', true, 'Berhasil encode ✓');
+  } else {
+    const ta = document.createElement('textarea');
+    ta.innerHTML = inEl.value;
+    out.textContent = ta.value;
+    setStatus('html-status', true, 'Berhasil decode ✓');
+  }
+}
+
+function copyOut(id){
+  const text = document.getElementById(id).textContent;
+  if(!text) return;
+  navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
+}
+
+loadSample('base64'); loadSample('url'); loadSample('html');
+</script>
+</body>
+</html>

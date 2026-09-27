@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DevTools — Kumpulan Tool Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:56px 24px 36px; border-bottom:1px solid var(--border); text-align:center;}
+header .dot{width:9px;height:9px;border-radius:50%;background:var(--accent); display:inline-block; margin-right:8px;}
+h1{font-size:1.6rem; font-weight:700; margin:0 0 10px;}
+header p{color:var(--muted); font-size:.95rem; max-width:520px; margin:0 auto; line-height:1.6;}
+main{max-width:1000px; margin:0 auto; padding:40px 24px 70px;}
+.grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(270px,1fr)); gap:14px;}
+a.card{
+  display:block; background:var(--panel); border:1px solid var(--border); border-radius:10px;
+  padding:20px 22px; text-decoration:none; color:var(--text); transition:border-color .15s;
+}
+a.card:hover{border-color:var(--accent);}
+.card .icon{font-size:1.4rem; margin-bottom:10px; display:block;}
+.card h2{font-size:.95rem; font-weight:600; margin:0 0 6px;}
+.card p{font-size:.8rem; color:var(--muted); margin:0; line-height:1.5;}
+.card .tags{margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;}
+.card .tag{font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--accent); background:rgba(232,163,61,.1); padding:2px 8px; border-radius:20px;}
+footer{max-width:1000px; margin:0 auto; padding:0 24px 50px; color:var(--muted); font-size:.78rem; text-align:center; line-height:1.6;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f;
+  }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="dot"></span>DevTools</h1>
+  <p>Kumpulan tool developer sehari-hari — formatter, converter, generator, dan checker. Semua berjalan di browser Anda, tanpa data terkirim ke server.</p>
+</header>
+<main>
+  <div class="grid">
+    <a class="card" href="json-toolkit.html">
+      <span class="icon">🧩</span>
+      <h2>JSON Toolkit</h2>
+      <p>Format &amp; validasi JSON, minify, konversi ke XML dan CSV.</p>
+      <div class="tags"><span class="tag">format</span><span class="tag">xml</span><span class="tag">csv</span></div>
+    </a>
+    <a class="card" href="encode-decode.html">
+      <span class="icon">🔐</span>
+      <h2>Encoder / Decoder</h2>
+      <p>Base64, URL, dan HTML entity — encode &amp; decode dua arah.</p>
+      <div class="tags"><span class="tag">base64</span><span class="tag">url</span><span class="tag">html</span></div>
+    </a>
+    <a class="card" href="uuid-hash.html">
+      <span class="icon">🔑</span>
+      <h2>UUID &amp; Hash Generator</h2>
+      <p>Buat UUID v4 massal, hitung MD5, SHA-1, SHA-256, SHA-384, SHA-512.</p>
+      <div class="tags"><span class="tag">uuid</span><span class="tag">md5</span><span class="tag">sha</span></div>
+    </a>
+    <a class="card" href="code-formatter.html">
+      <span class="icon">🛠️</span>
+      <h2>Formatter Kode</h2>
+      <p>Rapikan XML, CSS, JavaScript, dan SQL agar mudah dibaca.</p>
+      <div class="tags"><span class="tag">xml</span><span class="tag">css</span><span class="tag">js</span><span class="tag">sql</span></div>
+    </a>
+    <a class="card" href="markdown-yaml.html">
+      <span class="icon">📝</span>
+      <h2>Markdown &amp; YAML</h2>
+      <p>Pratinjau Markdown → HTML langsung, dan konversi YAML ↔ JSON.</p>
+      <div class="tags"><span class="tag">markdown</span><span class="tag">yaml</span></div>
+    </a>
+    <a class="card" href="diff-checker.html">
+      <span class="icon">🔍</span>
+      <h2>Diff Checker</h2>
+      <p>Bandingkan dua teks atau JSON, lihat perbedaannya baris demi baris.</p>
+      <div class="tags"><span class="tag">diff</span><span class="tag">json</span></div>
+    </a>
+    <a class="card" href="timestamp-lorem-regex.html">
+      <span class="icon">⏱️</span>
+      <h2>Timestamp, Lorem &amp; Regex</h2>
+      <p>Konversi Unix timestamp, buat teks placeholder, dan uji regex.</p>
+      <div class="tags"><span class="tag">unix</span><span class="tag">lorem</span><span class="tag">regex</span></div>
+    </a>
+  </div>
+</main>
+<footer>Dibuat sebagai pengganti freeformatter.com yang sudah tidak aktif. Setiap tool berjalan sepenuhnya di sisi klien (browser Anda) — tidak ada data yang dikirim atau disimpan di server mana pun.</footer>
+</body>
+</html>

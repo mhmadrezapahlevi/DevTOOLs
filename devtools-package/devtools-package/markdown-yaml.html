@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Markdown & YAML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  --error:#e5484d; --success:#4caf7d;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:28px 24px 18px; border-bottom:1px solid var(--border); position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.col h2{font-size:.72rem; color:var(--muted); font-weight:500; margin:0 0 8px; display:flex; justify-content:space-between; align-items:center;}
+.col h2 button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;}
+.col h2 button:hover{color:var(--text);border-color:var(--muted);}
+textarea, pre.output{
+  width:100%; height:380px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.55;
+  padding:14px; resize:vertical; overflow:auto; white-space:pre;
+}
+pre.output{white-space:pre-wrap; word-break:break-word; margin:0;}
+.preview{
+  width:100%; height:380px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  padding:14px 18px; overflow:auto; font-size:.9rem; line-height:1.6;
+}
+.preview h1,.preview h2,.preview h3{margin-top:0.6em;}
+.preview code{background:var(--panel2); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.85em;}
+.preview pre{background:var(--panel2); padding:10px; border-radius:6px; overflow:auto;}
+.preview a{color:var(--accent);}
+textarea:focus{outline:none; border-color:var(--accent);}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem; padding:10px 18px; border-radius:7px; cursor:pointer;}
+button.primary:hover{background:#f0b559;}
+button.ghost{background:none; border:1px solid var(--border); color:var(--text); font:inherit; font-size:.85rem; padding:10px 16px; border-radius:7px; cursor:pointer;}
+button.ghost:hover{border-color:var(--muted);}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace;}
+.status.ok{color:var(--success);}
+.status.err{color:var(--error);}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>Markdown &amp; YAML</h1></div>
+  <p class="sub">Pratinjau Markdown → HTML, dan konversi YAML ↔ JSON — di browser Anda.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="md">Markdown → HTML</button>
+    <button data-tab="yaml">YAML ↔ JSON</button>
+  </nav>
+
+  <section class="panel active" id="md">
+    <div class="grid">
+      <div class="col"><h2>Markdown <button onclick="loadSample('md')">contoh</button></h2><textarea id="md-in"></textarea></div>
+      <div class="col"><h2>Pratinjau</h2><div class="preview" id="md-preview"></div></div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runMd()">Render</button>
+      <button class="ghost" onclick="showMdHtml()">Lihat kode HTML</button>
+      <span class="status" id="md-status"></span>
+    </div>
+    <pre class="output" id="md-html-out" style="display:none; margin-top:12px;"></pre>
+  </section>
+
+  <section class="panel" id="yaml">
+    <div class="grid">
+      <div class="col"><h2>YAML <button onclick="loadSample('yaml')">contoh</button></h2><textarea id="yaml-in"></textarea></div>
+      <div class="col"><h2>JSON <button onclick="copyOut('json-out')">salin</button></h2><pre class="output" id="json-out"></pre></div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runYamlToJson()">YAML → JSON</button>
+      <button class="ghost" onclick="runJsonToYaml()">JSON → YAML</button>
+      <span class="status" id="yaml-status"></span>
+    </div>
+  </section>
+</main>
+<footer>Markdown dirender dengan marked.js, YAML diproses dengan js-yaml — keduanya library open-source populer, dimuat dari CDN.</footer>
+
+<script>
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+const SAMPLES = {
+  md: '# Judul Utama\n\nIni adalah **contoh** teks dengan *penekanan* dan `kode inline`.\n\n## Daftar\n- Item pertama\n- Item kedua\n- Item ketiga\n\n[Tautan ke Anthropic](https://anthropic.com)',
+  yaml: 'nama: Budi Santoso\numur: 30\nkota: Bandung\naktif: true\nhobi:\n  - membaca\n  - bersepeda\nalamat:\n  jalan: Jl. Merdeka No. 1\n  kodepos: "40111"'
+};
+function loadSample(tab){ document.getElementById(tab+'-in').value = SAMPLES[tab]; }
+function setStatus(id, ok, msg){ const el=document.getElementById(id); el.textContent=msg; el.className='status '+(ok?'ok':'err'); }
+function copyOut(id){ const t=document.getElementById(id).textContent; if(t) navigator.clipboard && navigator.clipboard.writeText(t).catch(()=>{}); }
+
+let lastHtml = '';
+function runMd(){
+  try{
+    const html = marked.parse(document.getElementById('md-in').value);
+    lastHtml = html;
+    document.getElementById('md-preview').innerHTML = html;
+    document.getElementById('md-html-out').style.display = 'none';
+    setStatus('md-status', true, 'Dirender ✓');
+  }catch(e){
+    setStatus('md-status', false, 'Error: ' + e.message);
+  }
+}
+function showMdHtml(){
+  const out = document.getElementById('md-html-out');
+  out.textContent = lastHtml;
+  out.style.display = out.style.display === 'none' ? 'block' : 'none';
+}
+
+function runYamlToJson(){
+  try{
+    const obj = jsyaml.load(document.getElementById('yaml-in').value);
+    document.getElementById('json-out').textContent = JSON.stringify(obj, null, 2);
+    setStatus('yaml-status', true, 'YAML valid → dikonversi ke JSON ✓');
+  }catch(e){
+    document.getElementById('json-out').textContent = '';
+    setStatus('yaml-status', false, 'Error: ' + e.message);
+  }
+}
+function runJsonToYaml(){
+  try{
+    const obj = JSON.parse(document.getElementById('json-out').textContent || document.getElementById('yaml-in').value);
+    const yaml = jsyaml.dump(obj);
+    document.getElementById('yaml-in').value = yaml;
+    setStatus('yaml-status', true, 'Dikonversi ke YAML ✓');
+  }catch(e){
+    setStatus('yaml-status', false, 'Error: pastikan panel JSON berisi JSON valid.');
+  }
+}
+
+loadSample('md'); loadSample('yaml');
+runMd(); runYamlToJson();
+</script>
+</body>
+</html>

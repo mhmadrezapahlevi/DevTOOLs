@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diff Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  --error:#e5484d; --success:#4caf7d; --add-bg:#12301f; --add-fg:#7fd9a5;
+  --rem-bg:#3a1416; --rem-fg:#f19a9d;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:28px 24px 18px; border-bottom:1px solid var(--border); position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.col h2{font-size:.72rem; color:var(--muted); font-weight:500; margin:0 0 8px;}
+textarea{
+  width:100%; height:260px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.55;
+  padding:14px; resize:vertical;
+}
+textarea:focus{outline:none; border-color:var(--accent);}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem; padding:10px 18px; border-radius:7px; cursor:pointer;}
+button.primary:hover{background:#f0b559;}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace; color:var(--muted);}
+.diff-view{
+  background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:6px 0;
+  font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.6; overflow:auto; max-height:500px;
+}
+.diff-line{padding:2px 14px; white-space:pre-wrap; word-break:break-word;}
+.diff-line.same{color:var(--muted);}
+.diff-line.added{background:var(--add-bg); color:var(--add-fg);}
+.diff-line.removed{background:var(--rem-bg); color:var(--rem-fg);}
+.diff-line .m{display:inline-block; width:1.2em; opacity:.8;}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f;
+    --add-bg:#e3f6ea; --add-fg:#1c6b3d; --rem-bg:#fbe6e7; --rem-fg:#a3282e;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>Diff Checker</h1></div>
+  <p class="sub">Bandingkan dua teks atau JSON baris demi baris — di browser Anda.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="text">Teks</button>
+    <button data-tab="json">JSON</button>
+  </nav>
+
+  <section class="panel active" id="text">
+    <div class="grid">
+      <div class="col"><h2>Teks Asli <button onclick="loadSample('text')" style="background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;">contoh</button></h2><textarea id="text-a"></textarea></div>
+      <div class="col"><h2>Teks Baru</h2><textarea id="text-b"></textarea></div>
+    </div>
+    <div class="actions"><button class="primary" onclick="runDiff('text')">Bandingkan</button><span class="status" id="text-status"></span></div>
+    <div class="diff-view" id="text-diff"></div>
+  </section>
+
+  <section class="panel" id="json">
+    <div class="grid">
+      <div class="col"><h2>JSON Asli <button onclick="loadSample('json')" style="background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;">contoh</button></h2><textarea id="json-a"></textarea></div>
+      <div class="col"><h2>JSON Baru</h2><textarea id="json-b"></textarea></div>
+    </div>
+    <div class="actions"><button class="primary" onclick="runDiff('json')">Bandingkan</button><span class="status" id="json-status"></span></div>
+    <div class="diff-view" id="json-diff"></div>
+  </section>
+</main>
+<footer>Diff dihitung dengan algoritma longest-common-subsequence di sisi klien — data Anda tidak terkirim ke server.</footer>
+
+<script>
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+const SAMPLES = {
+  text: {
+    a: 'Nama: Budi Santoso\nKota: Bandung\nUmur: 30\nStatus: Aktif',
+    b: 'Nama: Budi Santoso\nKota: Jakarta\nUmur: 31\nStatus: Aktif\nCatatan: Pindah tugas'
+  },
+  json: {
+    a: '{\n  "nama": "Budi",\n  "umur": 30,\n  "kota": "Bandung"\n}',
+    b: '{\n  "nama": "Budi",\n  "umur": 31,\n  "kota": "Jakarta",\n  "status": "aktif"\n}'
+  }
+};
+function loadSample(tab){
+  document.getElementById(tab+'-a').value = SAMPLES[tab].a;
+  document.getElementById(tab+'-b').value = SAMPLES[tab].b;
+}
+function setStatus(id, msg){ document.getElementById(id).textContent = msg; }
+
+// Validated LCS-based line diff
+function diffLines(a, b){
+  const linesA = a.split('\n');
+  const linesB = b.split('\n');
+  const n = linesA.length, m = linesB.length;
+  const dp = Array.from({length:n+1}, ()=>new Array(m+1).fill(0));
+  for (let i=n-1;i>=0;i--){
+    for (let j=m-1;j>=0;j--){
+      dp[i][j] = linesA[i]===linesB[j] ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j], dp[i][j+1]);
+    }
+  }
+  const result = [];
+  let i=0, j=0;
+  while (i<n && j<m) {
+    if (linesA[i]===linesB[j]) { result.push({type:'same', line:linesA[i]}); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]) { result.push({type:'removed', line:linesA[i]}); i++; }
+    else { result.push({type:'added', line:linesB[j]}); j++; }
+  }
+  while (i<n) { result.push({type:'removed', line:linesA[i]}); i++; }
+  while (j<m) { result.push({type:'added', line:linesB[j]}); j++; }
+  return result;
+}
+
+function renderDiff(containerId, result){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  result.forEach(r=>{
+    const div = document.createElement('div');
+    div.className = 'diff-line ' + r.type;
+    const marker = r.type==='same' ? ' ' : r.type==='added' ? '+' : '-';
+    div.innerHTML = '<span class="m">'+marker+'</span>' + escapeHtml(r.line || ' ');
+    container.appendChild(div);
+  });
+}
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function runDiff(mode){
+  let a = document.getElementById(mode+'-a').value;
+  let b = document.getElementById(mode+'-b').value;
+  if (mode === 'json') {
+    try{
+      a = JSON.stringify(JSON.parse(a), null, 2);
+      b = JSON.stringify(JSON.parse(b), null, 2);
+    }catch(e){
+      setStatus('json-status', 'Error: salah satu JSON tidak valid — ' + e.message);
+      document.getElementById('json-diff').innerHTML = '';
+      return;
+    }
+  }
+  const result = diffLines(a, b);
+  renderDiff(mode+'-diff', result);
+  const added = result.filter(r=>r.type==='added').length;
+  const removed = result.filter(r=>r.type==='removed').length;
+  setStatus(mode+'-status', added===0 && removed===0 ? 'Identik — tidak ada perbedaan ✓' : `${added} baris ditambahkan, ${removed} baris dihapus`);
+}
+
+loadSample('text'); loadSample('json');
+runDiff('text'); runDiff('json');
+</script>
+</body>
+</html>

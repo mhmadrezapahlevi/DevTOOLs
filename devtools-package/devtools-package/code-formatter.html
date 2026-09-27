@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formatter Kode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.1/beautify-css.min.js"></script>
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  --error:#e5484d; --success:#4caf7d;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:28px 24px 18px; border-bottom:1px solid var(--border); position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.col h2{font-size:.72rem; color:var(--muted); font-weight:500; margin:0 0 8px; display:flex; justify-content:space-between; align-items:center;}
+.col h2 button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;}
+.col h2 button:hover{color:var(--text);border-color:var(--muted);}
+textarea, pre.output{
+  width:100%; height:380px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.55;
+  padding:14px; resize:vertical; overflow:auto; white-space:pre; tab-size:2;
+}
+pre.output{white-space:pre-wrap; word-break:break-word; margin:0;}
+textarea:focus{outline:none; border-color:var(--accent);}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem; padding:10px 18px; border-radius:7px; cursor:pointer;}
+button.primary:hover{background:#f0b559;}
+button.ghost{background:none; border:1px solid var(--border); color:var(--text); font:inherit; font-size:.85rem; padding:10px 16px; border-radius:7px; cursor:pointer;}
+button.ghost:hover{border-color:var(--muted);}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace;}
+.status.ok{color:var(--success);}
+.status.err{color:var(--error);}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>Formatter Kode</h1></div>
+  <p class="sub">Rapikan XML, CSS, JavaScript, dan SQL — diproses di browser Anda.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="xml">XML</button>
+    <button data-tab="css">CSS</button>
+    <button data-tab="js">JavaScript</button>
+    <button data-tab="sql">SQL</button>
+  </nav>
+
+  <section class="panel active" id="xml">
+    <div class="grid">
+      <div class="col"><h2>Input XML <button onclick="loadSample('xml')">contoh</button></h2><textarea id="xml-in"></textarea></div>
+      <div class="col"><h2>Output <button onclick="copyOut('xml-out')">salin</button></h2><pre class="output" id="xml-out"></pre></div>
+    </div>
+    <div class="actions"><button class="primary" onclick="runXml()">Format</button><span class="status" id="xml-status"></span></div>
+  </section>
+
+  <section class="panel" id="css">
+    <div class="grid">
+      <div class="col"><h2>Input CSS <button onclick="loadSample('css')">contoh</button></h2><textarea id="css-in"></textarea></div>
+      <div class="col"><h2>Output <button onclick="copyOut('css-out')">salin</button></h2><pre class="output" id="css-out"></pre></div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runCss()">Format</button>
+      <span class="status" id="css-status"></span>
+    </div>
+  </section>
+
+  <section class="panel" id="js">
+    <div class="grid">
+      <div class="col"><h2>Input JavaScript <button onclick="loadSample('js')">contoh</button></h2><textarea id="js-in"></textarea></div>
+      <div class="col"><h2>Output <button onclick="copyOut('js-out')">salin</button></h2><pre class="output" id="js-out"></pre></div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runJs()">Format</button>
+      <span class="status" id="js-status"></span>
+    </div>
+  </section>
+
+  <section class="panel" id="sql">
+    <div class="grid">
+      <div class="col"><h2>Input SQL <button onclick="loadSample('sql')">contoh</button></h2><textarea id="sql-in"></textarea></div>
+      <div class="col"><h2>Output <button onclick="copyOut('sql-out')">salin</button></h2><pre class="output" id="sql-out"></pre></div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runSql()">Format</button>
+      <span class="status" id="sql-status"></span>
+    </div>
+  </section>
+</main>
+<footer>XML diformat dengan parser bawaan, CSS &amp; JS memakai js-beautify, SQL memakai formatter kata kunci ringan — semua di sisi klien.</footer>
+
+<script>
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+const SAMPLES = {
+  xml: '<root><user id="1"><name>Budi</name><city>Bandung</city></user><user id="2"><name>Siti</name><city>Jakarta</city></user></root>',
+  css: 'body{margin:0;padding:0;font-family:sans-serif} .card{border:1px solid #ccc;border-radius:8px;padding:12px}',
+  js: 'function greet(name){if(!name){return "Halo!"} return "Halo, "+name+"!"} const users=[{name:"Budi",age:30},{name:"Siti",age:27}];',
+  sql: "select u.id, u.name, o.total from users u left join orders o on u.id = o.user_id where o.total > 100 group by u.id order by o.total desc"
+};
+function loadSample(tab){ document.getElementById(tab+'-in').value = SAMPLES[tab]; }
+function setStatus(id, ok, msg){ const el=document.getElementById(id); el.textContent=msg; el.className='status '+(ok?'ok':'err'); }
+function copyOut(id){ const t=document.getElementById(id).textContent; if(t) navigator.clipboard && navigator.clipboard.writeText(t).catch(()=>{}); }
+
+// XML formatter (DOM-based, validates structure too)
+function formatXmlString(xml){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'application/xml');
+  const errNode = doc.querySelector('parsererror');
+  if (errNode) throw new Error('XML tidak valid.');
+  function serialize(node, depth){
+    const pad = '  '.repeat(depth);
+    if (node.nodeType === 3) { // text
+      const t = node.textContent.trim();
+      return t ? pad + t + '\n' : '';
+    }
+    if (node.nodeType !== 1) return '';
+    let attrs = '';
+    for (const a of node.attributes) attrs += ` ${a.name}="${a.value}"`;
+    const children = Array.from(node.childNodes).filter(n => n.nodeType===1 || (n.nodeType===3 && n.textContent.trim()));
+    if (children.length === 0) {
+      const text = node.textContent.trim();
+      return text ? `${pad}<${node.nodeName}${attrs}>${text}</${node.nodeName}>\n` : `${pad}<${node.nodeName}${attrs}/>\n`;
+    }
+    let out = `${pad}<${node.nodeName}${attrs}>\n`;
+    children.forEach(c => out += serialize(c, depth+1));
+    out += `${pad}</${node.nodeName}>\n`;
+    return out;
+  }
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + serialize(doc.documentElement, 0);
+}
+function runXml(){
+  try{
+    const out = formatXmlString(document.getElementById('xml-in').value);
+    document.getElementById('xml-out').textContent = out;
+    setStatus('xml-status', true, 'XML valid ✓');
+  }catch(e){
+    document.getElementById('xml-out').textContent = '';
+    setStatus('xml-status', false, 'Error: ' + e.message);
+  }
+}
+
+function runCss(){
+  try{
+    const out = css_beautify(document.getElementById('css-in').value, {indent_size:2});
+    document.getElementById('css-out').textContent = out;
+    setStatus('css-status', true, 'Berhasil diformat ✓');
+  }catch(e){
+    setStatus('css-status', false, 'Error: ' + e.message);
+  }
+}
+
+function runJs(){
+  try{
+    const out = js_beautify(document.getElementById('js-in').value, {indent_size:2});
+    document.getElementById('js-out').textContent = out;
+    setStatus('js-status', true, 'Berhasil diformat ✓');
+  }catch(e){
+    setStatus('js-status', false, 'Error: ' + e.message);
+  }
+}
+
+// SQL formatter (validated keyword-based logic)
+function formatSql(sql){
+  const KEYWORDS = ['LEFT OUTER JOIN','RIGHT OUTER JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','JOIN',
+    'GROUP BY','ORDER BY','UNION ALL','UNION','SELECT','FROM','WHERE','AND','OR','HAVING','ON',
+    'INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','LIMIT','OFFSET'];
+  KEYWORDS.sort((a,b)=>b.length-a.length);
+  const alt = KEYWORDS.map(k=>k.replace(/ /g,'\\s+')).join('|');
+  const re = new RegExp('\\b(' + alt + ')\\b', 'gi');
+  let s = sql.replace(/\s+/g, ' ').trim();
+  s = s.replace(re, m => '\n' + m.toUpperCase().replace(/\s+/g,' '));
+  s = s.replace(/,\s*/g, ',\n  ');
+  const mainKw = ['SELECT','FROM','WHERE','GROUP BY','ORDER BY','HAVING','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','LIMIT','OFFSET','UNION','UNION ALL'];
+  const lines = s.split('\n').map(l=>l.trim()).filter(Boolean);
+  return lines.map(line => (mainKw.some(kw=>line.startsWith(kw)) ? '' : '  ') + line).join('\n');
+}
+function runSql(){
+  const out = formatSql(document.getElementById('sql-in').value);
+  document.getElementById('sql-out').textContent = out;
+  setStatus('sql-status', true, 'Berhasil diformat ✓');
+}
+
+loadSample('xml'); loadSample('css'); loadSample('js'); loadSample('sql');
+runXml(); runCss(); runJs(); runSql();
+</script>
+</body>
+</html>

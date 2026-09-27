@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JSON Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d; --accent-dim:#8a641f;
+  --error:#e5484d; --success:#4caf7d;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{
+  margin:0; min-height:100%; background:var(--bg); color:var(--text);
+  font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+}
+header{
+  padding:28px 24px 18px; border-bottom:1px solid var(--border);
+  position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;
+}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0; letter-spacing:.01em;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{
+  background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem;
+  padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.col h2{font-size:.72rem; text-transform:none; color:var(--muted); font-weight:500; margin:0 0 8px; display:flex; justify-content:space-between; align-items:center;}
+.col h2 button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;}
+.col h2 button:hover{color:var(--text);border-color:var(--muted);}
+textarea, pre.output{
+  width:100%; height:380px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.55;
+  padding:14px; resize:vertical; overflow:auto; white-space:pre; tab-size:2;
+}
+pre.output{white-space:pre-wrap; word-break:break-word; margin:0;}
+textarea:focus{outline:none; border-color:var(--accent);}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{
+  background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem;
+  padding:10px 18px; border-radius:7px; cursor:pointer;
+}
+button.primary:hover{background:#f0b559;}
+button.ghost{
+  background:none; border:1px solid var(--border); color:var(--text); font:inherit; font-size:.85rem;
+  padding:10px 16px; border-radius:7px; cursor:pointer;
+}
+button.ghost:hover{border-color:var(--muted);}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace;}
+.status.ok{color:var(--success);}
+.status.err{color:var(--error);}
+.opts{display:flex; gap:16px; align-items:center; margin-bottom:14px; font-size:.82rem; color:var(--muted); flex-wrap:wrap;}
+.opts label{display:flex; align-items:center; gap:6px; cursor:pointer;}
+select{background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 8px; font:inherit; font-size:.8rem;}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f; --accent-dim:#e8c98a;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>JSON Toolkit</h1></div>
+  <p class="sub">Format, validate, dan konversi JSON — semua diproses di browser Anda, tidak ada data yang dikirim ke server.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="format">Format &amp; Validasi</button>
+    <button data-tab="minify">Minify</button>
+    <button data-tab="xml">JSON → XML</button>
+    <button data-tab="csv">JSON → CSV</button>
+  </nav>
+
+  <!-- FORMAT -->
+  <section class="panel active" id="format">
+    <div class="grid">
+      <div class="col">
+        <h2>Input JSON <button onclick="loadSample('format')">contoh</button></h2>
+        <textarea id="format-in" placeholder='{"nama":"Budi","umur":30,"kota":"Bandung"}'></textarea>
+      </div>
+      <div class="col">
+        <h2>Output <button onclick="copyOut('format-out')">salin</button></h2>
+        <pre class="output" id="format-out"></pre>
+      </div>
+    </div>
+    <div class="opts">
+      <label>Indentasi
+        <select id="format-indent">
+          <option value="2">2 spasi</option>
+          <option value="4">4 spasi</option>
+          <option value="tab">Tab</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="format-sort"> Urutkan key A-Z</label>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runFormat()">Format</button>
+      <span class="status" id="format-status"></span>
+    </div>
+  </section>
+
+  <!-- MINIFY -->
+  <section class="panel" id="minify">
+    <div class="grid">
+      <div class="col">
+        <h2>Input JSON <button onclick="loadSample('minify')">contoh</button></h2>
+        <textarea id="minify-in"></textarea>
+      </div>
+      <div class="col">
+        <h2>Output <button onclick="copyOut('minify-out')">salin</button></h2>
+        <pre class="output" id="minify-out"></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runMinify()">Minify</button>
+      <span class="status" id="minify-status"></span>
+    </div>
+  </section>
+
+  <!-- XML -->
+  <section class="panel" id="xml">
+    <div class="grid">
+      <div class="col">
+        <h2>Input JSON <button onclick="loadSample('xml')">contoh</button></h2>
+        <textarea id="xml-in"></textarea>
+      </div>
+      <div class="col">
+        <h2>Output XML <button onclick="copyOut('xml-out')">salin</button></h2>
+        <pre class="output" id="xml-out"></pre>
+      </div>
+    </div>
+    <div class="opts">
+      <label>Root element
+        <select id="xml-root" style="width:120px"></select>
+      </label>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runXml()">Konversi ke XML</button>
+      <span class="status" id="xml-status"></span>
+    </div>
+  </section>
+
+  <!-- CSV -->
+  <section class="panel" id="csv">
+    <div class="grid">
+      <div class="col">
+        <h2>Input JSON (array of objects) <button onclick="loadSample('csv')">contoh</button></h2>
+        <textarea id="csv-in"></textarea>
+      </div>
+      <div class="col">
+        <h2>Output CSV <button onclick="copyOut('csv-out')">salin</button></h2>
+        <pre class="output" id="csv-out"></pre>
+      </div>
+    </div>
+    <div class="opts">
+      <label>Pemisah
+        <select id="csv-delim">
+          <option value=",">Koma (,)</option>
+          <option value=";">Titik koma (;)</option>
+          <option value="\t">Tab</option>
+        </select>
+      </label>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runCsv()">Konversi ke CSV</button>
+      <span class="status" id="csv-status"></span>
+    </div>
+  </section>
+</main>
+<footer>Diproses sepenuhnya di sisi klien — file JSON Anda tidak pernah meninggalkan perangkat.</footer>
+
+<script>
+// tabs
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+const SAMPLE_OBJ = {name:"Budi Santoso", age:30, city:"Bandung", active:true, tags:["staff","admin"]};
+const SAMPLE_ARR = [
+  {name:"Budi Santoso", age:30, city:"Bandung"},
+  {name:"Siti Aminah", age:27, city:"Jakarta"},
+  {name:"Andi Wijaya", age:35, city:"Surabaya"}
+];
+function loadSample(tab){
+  if(tab==='csv'){ document.getElementById('csv-in').value = JSON.stringify(SAMPLE_ARR, null, 2); }
+  else { document.getElementById(tab+'-in').value = JSON.stringify(SAMPLE_OBJ, null, 2); }
+  if(tab==='xml') populateXmlRoot();
+}
+
+function setStatus(id, ok, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + (ok ? 'ok' : 'err');
+}
+
+function safeParse(raw, statusId){
+  try{
+    if(!raw.trim()) throw new Error('Input kosong.');
+    return { data: JSON.parse(raw), error:null };
+  }catch(e){
+    setStatus(statusId, false, 'Error: ' + e.message);
+    return { data:null, error:e };
+  }
+}
+
+// FORMAT
+function runFormat(){
+  const raw = document.getElementById('format-in').value;
+  const {data, error} = safeParse(raw,'format-status');
+  if(error) { document.getElementById('format-out').textContent=''; return; }
+  let indentSel = document.getElementById('format-indent').value;
+  const indent = indentSel==='tab' ? '\t' : parseInt(indentSel,10);
+  let obj = data;
+  if(document.getElementById('format-sort').checked){ obj = sortKeys(obj); }
+  const out = JSON.stringify(obj, null, indent);
+  document.getElementById('format-out').textContent = out;
+  setStatus('format-status', true, 'JSON valid ✓');
+}
+function sortKeys(val){
+  if(Array.isArray(val)) return val.map(sortKeys);
+  if(val && typeof val==='object'){
+    const out={};
+    Object.keys(val).sort().forEach(k=>{ out[k]=sortKeys(val[k]); });
+    return out;
+  }
+  return val;
+}
+
+// MINIFY
+function runMinify(){
+  const raw = document.getElementById('minify-in').value;
+  const {data, error} = safeParse(raw,'minify-status');
+  if(error){ document.getElementById('minify-out').textContent=''; return; }
+  const out = JSON.stringify(data);
+  document.getElementById('minify-out').textContent = out;
+  setStatus('minify-status', true, 'Diminifikasi: ' + out.length + ' karakter');
+}
+
+// XML
+function populateXmlRoot(){
+  const raw = document.getElementById('xml-in').value;
+  const sel = document.getElementById('xml-root');
+  try{
+    const data = JSON.parse(raw);
+    sel.innerHTML = '';
+    const opt1 = document.createElement('option'); opt1.value='root'; opt1.textContent='root'; sel.appendChild(opt1);
+  }catch(e){ /* ignore */ }
+}
+document.getElementById('xml-in').addEventListener('input', populateXmlRoot);
+function escXml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function jsonToXml(val, tag){
+  if(val===null || val===undefined) return `<${tag}/>`;
+  if(Array.isArray(val)){
+    return val.map(item=>jsonToXml(item, singularize(tag))).join('');
+  }
+  if(typeof val==='object'){
+    let inner='';
+    for(const k of Object.keys(val)){
+      const v = val[k];
+      if(Array.isArray(v)){
+        inner += `<${sanitizeTag(k)}>` + v.map(item=>jsonToXml(item, singularize(k))).join('') + `</${sanitizeTag(k)}>`;
+      } else {
+        inner += jsonToXml(v, sanitizeTag(k));
+      }
+    }
+    return `<${tag}>${inner}</${tag}>`;
+  }
+  return `<${tag}>${escXml(val)}</${tag}>`;
+}
+function sanitizeTag(k){ return String(k).replace(/[^a-zA-Z0-9_\-]/g,'_').replace(/^(\d)/,'_$1') || 'item'; }
+function singularize(tag){
+  if(tag.endsWith('ies')) return tag.slice(0,-3)+'y';
+  if(tag.endsWith('s') && !tag.endsWith('ss')) return tag.slice(0,-1);
+  return tag+'_item';
+}
+function formatXml(xml){
+  let formatted=''; let indent='';
+  xml.split(/>\s*</).forEach(node=>{
+    if(node.match(/^\/\w/)) indent = indent.substring(2);
+    formatted += indent + '<' + node.replace(/^</,'') + '>\r\n';
+    if(node.match(/^<?\w[^>]*[^\/]$/) && !node.startsWith('?')) indent += '  ';
+  });
+  return formatted.substring(1, formatted.length-3);
+}
+function runXml(){
+  const raw = document.getElementById('xml-in').value;
+  const {data, error} = safeParse(raw,'xml-status');
+  if(error){ document.getElementById('xml-out').textContent=''; return; }
+  const root = document.getElementById('xml-root').value || 'root';
+  const rawXml = '<?xml version="1.0" encoding="UTF-8"?>' + jsonToXml(data, root);
+  const pretty = formatXml(rawXml);
+  document.getElementById('xml-out').textContent = pretty;
+  setStatus('xml-status', true, 'Berhasil dikonversi ke XML ✓');
+}
+
+// CSV
+function flattenObj(obj, prefix=''){
+  let out={};
+  for(const k of Object.keys(obj)){
+    const val = obj[k];
+    const key = prefix ? prefix+'.'+k : k;
+    if(val && typeof val==='object' && !Array.isArray(val)){
+      Object.assign(out, flattenObj(val, key));
+    } else if(Array.isArray(val)){
+      out[key] = val.map(v => typeof v==='object' ? JSON.stringify(v) : v).join('|');
+    } else {
+      out[key] = val;
+    }
+  }
+  return out;
+}
+function csvEscape(val, delim){
+  if(val===null||val===undefined) return '';
+  let s = String(val);
+  if(s.includes(delim) || s.includes('"') || s.includes('\n')){
+    s = '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
+}
+function runCsv(){
+  const raw = document.getElementById('csv-in').value;
+  const {data, error} = safeParse(raw,'csv-status');
+  if(error){ document.getElementById('csv-out').textContent=''; return; }
+  let arr = Array.isArray(data) ? data : [data];
+  if(arr.length===0){ setStatus('csv-status', false, 'Array kosong.'); return; }
+  const rows = arr.map(item => (item && typeof item==='object' && !Array.isArray(item)) ? flattenObj(item) : {value:item});
+  const delimRaw = document.getElementById('csv-delim').value;
+  const delim = delimRaw === '\\t' ? '\t' : delimRaw;
+  const headers = Array.from(rows.reduce((set,r)=>{ Object.keys(r).forEach(k=>set.add(k)); return set; }, new Set()));
+  let out = headers.map(h=>csvEscape(h,delim)).join(delim) + '\n';
+  out += rows.map(r => headers.map(h=>csvEscape(r[h], delim)).join(delim)).join('\n');
+  document.getElementById('csv-out').textContent = out;
+  setStatus('csv-status', true, arr.length + ' baris dikonversi ✓');
+}
+
+// copy
+function copyOut(id){
+  const text = document.getElementById(id).textContent;
+  if(!text) return;
+  navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
+}
+
+// init with samples
+loadSample('format');
+document.getElementById('minify-in').value = JSON.stringify(SAMPLE_OBJ, null, 2);
+document.getElementById('xml-in').value = JSON.stringify(SAMPLE_OBJ, null, 2);
+populateXmlRoot();
+document.getElementById('csv-in').value = JSON.stringify(SAMPLE_ARR, null, 2);
+</script>
+</body>
+</html>

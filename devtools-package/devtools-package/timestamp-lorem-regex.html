@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Timestamp, Lorem Ipsum & Regex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  --error:#e5484d; --success:#4caf7d; --match-bg:#3d2f10;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:28px 24px 18px; border-bottom:1px solid var(--border); position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid{grid-template-columns:1fr;}}
+.col h2{font-size:.72rem; color:var(--muted); font-weight:500; margin:0 0 8px;}
+input[type=text], input[type=number], textarea, select{
+  background:var(--panel); border:1px solid var(--border); border-radius:8px; color:var(--text);
+  font-family:'JetBrains Mono',monospace; font-size:.85rem; padding:10px 12px; width:100%;
+}
+input:focus, textarea:focus, select:focus{outline:none; border-color:var(--accent);}
+textarea{height:160px; resize:vertical; line-height:1.55;}
+.row{display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap;}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem; padding:10px 18px; border-radius:7px; cursor:pointer;}
+button.primary:hover{background:#f0b559;}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace; color:var(--muted);}
+.status.ok{color:var(--success);} .status.err{color:var(--error);}
+.result-card{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:16px 18px; margin-top:10px;}
+.result-card .k{color:var(--muted); font-size:.72rem;}
+.result-card .v{font-family:'JetBrains Mono',monospace; font-size:.95rem; margin-top:2px;}
+pre.output{
+  width:100%; min-height:180px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.85rem; line-height:1.6;
+  padding:14px; white-space:pre-wrap; word-break:break-word; margin:0;
+}
+mark{background:var(--match-bg); color:var(--accent); border-radius:2px;}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f; --match-bg:#fbe8c8;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>Timestamp, Lorem Ipsum &amp; Regex</h1></div>
+  <p class="sub">Konversi waktu Unix, buat teks placeholder, dan uji regular expression — di browser Anda.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="ts">Timestamp</button>
+    <button data-tab="lorem">Lorem Ipsum</button>
+    <button data-tab="regex">Regex Tester</button>
+  </nav>
+
+  <!-- TIMESTAMP -->
+  <section class="panel active" id="ts">
+    <div class="grid">
+      <div class="col">
+        <h2>Unix Timestamp (detik)</h2>
+        <input type="text" id="ts-unix" placeholder="1735689600">
+        <div class="actions"><button class="primary" onclick="unixToDate()">→ Konversi ke Tanggal</button><button class="primary" style="background:var(--panel2); color:var(--text); border:1px solid var(--border);" onclick="setNow()">Gunakan waktu sekarang</button></div>
+      </div>
+      <div class="col">
+        <h2>Tanggal &amp; Waktu (lokal browser Anda)</h2>
+        <input type="text" id="ts-date" placeholder="2026-09-27 14:30:00">
+        <div class="actions"><button class="primary" onclick="dateToUnix()">→ Konversi ke Unix</button></div>
+      </div>
+    </div>
+    <div class="result-card" id="ts-result" style="display:none;">
+      <div class="k">Hasil</div>
+      <div class="v" id="ts-result-local"></div>
+      <div class="v" id="ts-result-iso" style="color:var(--muted); font-size:.82rem; margin-top:4px;"></div>
+      <div class="v" id="ts-result-unix" style="color:var(--muted); font-size:.82rem;"></div>
+    </div>
+    <div class="status err" id="ts-status" style="margin-top:8px;"></div>
+  </section>
+
+  <!-- LOREM -->
+  <section class="panel" id="lorem">
+    <div class="row">
+      <label>Jumlah <select id="lorem-unit"><option value="paragraphs">Paragraf</option><option value="sentences">Kalimat</option><option value="words">Kata</option></select></label>
+      <input type="number" id="lorem-count" value="3" min="1" max="50" style="width:80px;">
+      <label><input type="checkbox" id="lorem-start" checked> Mulai dengan "Lorem ipsum dolor sit amet"</label>
+    </div>
+    <div class="actions"><button class="primary" onclick="runLorem()">Generate</button><button class="primary" style="background:var(--panel2); color:var(--text); border:1px solid var(--border);" onclick="copyOut('lorem-out')">Salin</button></div>
+    <pre class="output" id="lorem-out"></pre>
+  </section>
+
+  <!-- REGEX -->
+  <section class="panel" id="regex">
+    <div class="row">
+      <input type="text" id="regex-pattern" placeholder="\\b\\w+@\\w+\\.\\w+\\b" style="flex:1; min-width:200px;">
+      <input type="text" id="regex-flags" placeholder="gi" style="width:80px;">
+    </div>
+    <h2>Teks uji</h2>
+    <textarea id="regex-text" placeholder="Tempel teks yang ingin diuji di sini..."></textarea>
+    <div class="actions"><button class="primary" onclick="runRegex()">Uji Regex</button><span class="status" id="regex-status"></span></div>
+    <div class="col"><h2>Hasil</h2><pre class="output" id="regex-out"></pre></div>
+  </section>
+</main>
+<footer>Diproses sepenuhnya di sisi klien — data Anda tidak pernah meninggalkan perangkat.</footer>
+
+<script>
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- TIMESTAMP ----
+function pad(n){ return String(n).padStart(2,'0'); }
+function showTsResult(date){
+  document.getElementById('ts-status').textContent = '';
+  document.getElementById('ts-result').style.display = 'block';
+  document.getElementById('ts-result-local').textContent = date.toLocaleString('id-ID', {dateStyle:'full', timeStyle:'medium'});
+  document.getElementById('ts-result-iso').textContent = 'ISO 8601: ' + date.toISOString();
+  document.getElementById('ts-result-unix').textContent = 'Unix (detik): ' + Math.floor(date.getTime()/1000);
+}
+function unixToDate(){
+  const raw = document.getElementById('ts-unix').value.trim();
+  if(!raw){ document.getElementById('ts-status').textContent = 'Masukkan Unix timestamp.'; return; }
+  let n = Number(raw);
+  if(isNaN(n)){ document.getElementById('ts-status').textContent = 'Error: bukan angka yang valid.'; return; }
+  if (Math.abs(n) < 1e11) n = n * 1000; // treat as seconds if it looks like seconds
+  const date = new Date(n);
+  if(isNaN(date.getTime())){ document.getElementById('ts-status').textContent = 'Error: timestamp di luar jangkauan.'; return; }
+  document.getElementById('ts-date').value = `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  showTsResult(date);
+}
+function dateToUnix(){
+  const raw = document.getElementById('ts-date').value.trim();
+  if(!raw){ document.getElementById('ts-status').textContent = 'Masukkan tanggal (format: YYYY-MM-DD HH:MM:SS).'; return; }
+  const normalized = raw.replace(' ', 'T');
+  const date = new Date(normalized);
+  if(isNaN(date.getTime())){ document.getElementById('ts-status').textContent = 'Error: format tanggal tidak dikenali. Gunakan YYYY-MM-DD HH:MM:SS.'; return; }
+  document.getElementById('ts-unix').value = Math.floor(date.getTime()/1000);
+  showTsResult(date);
+}
+function setNow(){
+  const now = new Date();
+  document.getElementById('ts-unix').value = Math.floor(now.getTime()/1000);
+  document.getElementById('ts-date').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  showTsResult(now);
+}
+
+// ---- LOREM IPSUM ----
+const LOREM_WORDS = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum".split(' ');
+function randWord(){ return LOREM_WORDS[Math.floor(Math.random()*LOREM_WORDS.length)]; }
+function genSentence(minW=6,maxW=14){
+  const n = minW + Math.floor(Math.random()*(maxW-minW));
+  let words = []; for(let i=0;i<n;i++) words.push(randWord());
+  words[0] = words[0][0].toUpperCase()+words[0].slice(1);
+  return words.join(' ') + '.';
+}
+function genParagraph(sentences=5){
+  let s = []; for(let i=0;i<sentences;i++) s.push(genSentence());
+  return s.join(' ');
+}
+function runLorem(){
+  const unit = document.getElementById('lorem-unit').value;
+  const count = Math.max(1, parseInt(document.getElementById('lorem-count').value,10) || 1);
+  const startFixed = document.getElementById('lorem-start').checked;
+  let out = '';
+  if(unit==='words'){
+    let words = []; for(let i=0;i<count;i++) words.push(randWord());
+    if(startFixed){ words = ['Lorem','ipsum','dolor','sit','amet'].concat(words).slice(0,count); }
+    words[0] = words[0][0].toUpperCase()+words[0].slice(1);
+    out = words.join(' ') + '.';
+  } else if(unit==='sentences'){
+    let sents = []; for(let i=0;i<count;i++) sents.push(genSentence());
+    if(startFixed) sents[0] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    out = sents.join(' ');
+  } else {
+    let paras = []; for(let i=0;i<count;i++) paras.push(genParagraph());
+    if(startFixed) paras[0] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' + paras[0];
+    out = paras.join('\n\n');
+  }
+  document.getElementById('lorem-out').textContent = out;
+}
+function copyOut(id){ const t=document.getElementById(id).textContent; if(t) navigator.clipboard && navigator.clipboard.writeText(t).catch(()=>{}); }
+
+// ---- REGEX ----
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function runRegex(){
+  const pattern = document.getElementById('regex-pattern').value;
+  const flags = document.getElementById('regex-flags').value;
+  const text = document.getElementById('regex-text').value;
+  const statusEl = document.getElementById('regex-status');
+  const outEl = document.getElementById('regex-out');
+  if(!pattern){ statusEl.textContent='Masukkan pola regex.'; statusEl.className='status err'; outEl.textContent=''; return; }
+  let re;
+  try{
+    re = new RegExp(pattern, flags.includes('g') ? flags : flags+'g');
+  }catch(e){
+    statusEl.textContent = 'Error: ' + e.message;
+    statusEl.className = 'status err';
+    outEl.textContent = '';
+    return;
+  }
+  const matches = [...text.matchAll(re)];
+  let highlighted = escapeHtml(text);
+  if(matches.length){
+    let result = ''; let lastIndex = 0;
+    for(const m of matches){
+      result += escapeHtml(text.slice(lastIndex, m.index));
+      result += '<mark>' + escapeHtml(m[0]) + '</mark>';
+      lastIndex = m.index + m[0].length;
+      if(m[0].length === 0) lastIndex++;
+    }
+    result += escapeHtml(text.slice(lastIndex));
+    highlighted = result;
+  }
+  outEl.innerHTML = highlighted || '<span style="color:var(--muted)">(kosong)</span>';
+  statusEl.textContent = matches.length + ' kecocokan ditemukan';
+  statusEl.className = 'status ok';
+}
+
+// init
+setNow();
+runLorem();
+document.getElementById('regex-pattern').value = '\\b\\w+@\\w+\\.\\w+\\b';
+document.getElementById('regex-flags').value = 'gi';
+document.getElementById('regex-text').value = 'Hubungi kami di info@contoh.com atau support@contoh.co.id untuk bantuan.';
+runRegex();
+</script>
+</body>
+</html>

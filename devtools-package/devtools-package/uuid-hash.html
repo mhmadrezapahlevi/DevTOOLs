@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UUID & Hash Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --border:#2a2e38;
+  --text:#e6e8ec; --muted:#8b90a0; --accent:#e8a33d;
+  --error:#e5484d; --success:#4caf7d;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;}
+header{padding:28px 24px 18px; border-bottom:1px solid var(--border); position:sticky; top:env(safe-area-inset-top,0px); background:var(--bg); z-index:5;}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:1100px; margin:0 auto;}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+h1{font-size:1.05rem; font-weight:600; margin:0;}
+.sub{color:var(--muted); font-size:.85rem; margin:6px 0 0; max-width:1100px; margin-left:auto; margin-right:auto;}
+main{max-width:1100px; margin:0 auto; padding:22px 24px 60px;}
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--border);}
+nav.tabs button{background:none; border:none; color:var(--muted); font:inherit; font-size:.85rem; padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+nav.tabs button.active{color:var(--text); border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--text);}
+.panel{display:none;}
+.panel.active{display:block;}
+.col h2{font-size:.72rem; color:var(--muted); font-weight:500; margin:0 0 8px; display:flex; justify-content:space-between; align-items:center;}
+.col h2 button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:3px 8px;border-radius:5px;cursor:pointer;}
+.col h2 button:hover{color:var(--text);border-color:var(--muted);}
+textarea{
+  width:100%; height:100px; background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.85rem; line-height:1.55;
+  padding:14px; resize:vertical;
+}
+textarea:focus{outline:none; border-color:var(--accent);}
+.actions{display:flex; gap:10px; margin:16px 0; flex-wrap:wrap; align-items:center;}
+button.primary{background:var(--accent); color:#1a1200; border:none; font:inherit; font-weight:600; font-size:.85rem; padding:10px 18px; border-radius:7px; cursor:pointer;}
+button.primary:hover{background:#f0b559;}
+select{background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:9px 10px; font:inherit; font-size:.85rem;}
+.opts{display:flex; gap:16px; align-items:center; margin-bottom:14px; font-size:.82rem; color:var(--muted); flex-wrap:wrap;}
+.opts label{display:flex; align-items:center; gap:6px; cursor:pointer;}
+.uuid-list{display:flex; flex-direction:column; gap:8px; margin-top:16px;}
+.uuid-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 14px;
+  font-family:'JetBrains Mono',monospace; font-size:.85rem;
+}
+.uuid-row button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.72rem;padding:4px 10px;border-radius:5px;cursor:pointer; flex:none;}
+.uuid-row button:hover{color:var(--text);border-color:var(--muted);}
+.hash-rows{display:flex; flex-direction:column; gap:10px; margin-top:16px;}
+.hash-row{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:12px 14px;}
+.hash-row .label{color:var(--muted); font-size:.72rem; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;}
+.hash-row .label button{background:none;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:.7rem;padding:3px 8px;border-radius:5px;cursor:pointer;}
+.hash-row .label button:hover{color:var(--text);border-color:var(--muted);}
+.hash-row .val{font-family:'JetBrains Mono',monospace; font-size:.82rem; word-break:break-all;}
+.status{font-size:.8rem; font-family:'JetBrains Mono',monospace; color:var(--success);}
+footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:.75rem;}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0efec; --border:#dcdad3;
+    --text:#1c1d1f; --muted:#6b6d73; --accent:#c07d1f;
+  }
+  :root:not([data-theme="dark"]) button.primary{color:#fff;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span><h1>UUID &amp; Hash Generator</h1></div>
+  <p class="sub">Buat UUID v4 dan hitung hash (MD5, SHA-1, SHA-256, SHA-384, SHA-512) — semua di browser Anda.</p>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="active" data-tab="uuid">UUID</button>
+    <button data-tab="hash">Hash</button>
+  </nav>
+
+  <!-- UUID -->
+  <section class="panel active" id="uuid">
+    <div class="opts">
+      <label>Jumlah
+        <select id="uuid-count">
+          <option>1</option><option>5</option><option selected>10</option><option>20</option><option>50</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="uuid-upper"> Huruf besar</label>
+      <label><input type="checkbox" id="uuid-hyphen" checked> Dengan tanda hubung</label>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="runUuid()">Generate</button>
+      <button class="ghost" style="background:none;border:1px solid var(--border);color:var(--text);font:inherit;font-size:.85rem;padding:10px 16px;border-radius:7px;cursor:pointer;" onclick="copyAllUuid()">Salin semua</button>
+      <span class="status" id="uuid-status"></span>
+    </div>
+    <div class="uuid-list" id="uuid-list"></div>
+  </section>
+
+  <!-- HASH -->
+  <section class="panel" id="hash">
+    <h2>Teks input</h2>
+    <textarea id="hash-in" placeholder="Ketik teks yang ingin di-hash..."></textarea>
+    <div class="actions">
+      <button class="primary" onclick="runHash()">Hitung Hash</button>
+      <span class="status" id="hash-status"></span>
+    </div>
+    <div class="hash-rows" id="hash-rows"></div>
+  </section>
+</main>
+<footer>Diproses sepenuhnya di sisi klien menggunakan Web Crypto API (SHA) dan implementasi MD5 murni JavaScript yang tervalidasi terhadap vektor uji standar.</footer>
+
+<script>
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- UUID v4 ----
+function genUuid(){
+  if(crypto.randomUUID) return crypto.randomUUID();
+  const buf = new Uint8Array(16);
+  crypto.getRandomValues(buf);
+  buf[6] = (buf[6] & 0x0f) | 0x40;
+  buf[8] = (buf[8] & 0x3f) | 0x80;
+  const hex = [...buf].map(b=>b.toString(16).padStart(2,'0'));
+  return `${hex[0]}${hex[1]}${hex[2]}${hex[3]}-${hex[4]}${hex[5]}-${hex[6]}${hex[7]}-${hex[8]}${hex[9]}-${hex[10]}${hex[11]}${hex[12]}${hex[13]}${hex[14]}${hex[15]}`;
+}
+let lastUuids = [];
+function runUuid(){
+  const count = parseInt(document.getElementById('uuid-count').value,10);
+  const upper = document.getElementById('uuid-upper').checked;
+  const hyphen = document.getElementById('uuid-hyphen').checked;
+  const list = document.getElementById('uuid-list');
+  list.innerHTML = '';
+  lastUuids = [];
+  for(let i=0;i<count;i++){
+    let id = genUuid();
+    if(!hyphen) id = id.replace(/-/g,'');
+    if(upper) id = id.toUpperCase();
+    lastUuids.push(id);
+    const row = document.createElement('div');
+    row.className = 'uuid-row';
+    const span = document.createElement('span');
+    span.textContent = id;
+    const btn = document.createElement('button');
+    btn.textContent = 'salin';
+    btn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(id).catch(()=>{}); };
+    row.appendChild(span); row.appendChild(btn);
+    list.appendChild(row);
+  }
+  document.getElementById('uuid-status').textContent = count + ' UUID dibuat ✓';
+}
+function copyAllUuid(){
+  if(!lastUuids.length) return;
+  navigator.clipboard && navigator.clipboard.writeText(lastUuids.join('\n')).catch(()=>{});
+  document.getElementById('uuid-status').textContent = 'Semua UUID disalin ✓';
+}
+
+// ---- MD5 (validated against RFC 1321 test vectors) ----
+function md5(str){
+  function rotl(x,c){return (x<<c)|(x>>>(32-c));}
+  function toHexLE(n){
+    let s='';
+    for(let i=0;i<4;i++){ s += ((n>>(i*8))&0xff).toString(16).padStart(2,'0'); }
+    return s;
+  }
+  const K = []; for(let i=0;i<64;i++){ K[i] = Math.floor(Math.abs(Math.sin(i+1))*4294967296); }
+  const S = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
+             5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+             4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
+             6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  const bytes = new TextEncoder().encode(str);
+  const bitLen = bytes.length * 8;
+  let msgLen = bytes.length + 1;
+  while (msgLen % 64 !== 56) msgLen++;
+  const msg = new Uint8Array(msgLen + 8);
+  msg.set(bytes);
+  msg[bytes.length] = 0x80;
+  const dv = new DataView(msg.buffer);
+  dv.setUint32(msgLen, bitLen >>> 0, true);
+  dv.setUint32(msgLen+4, Math.floor(bitLen/4294967296), true);
+
+  let a0=0x67452301, b0=0xefcdab89, c0=0x98badcfe, d0=0x10325476;
+  for(let chunk=0; chunk<msg.length; chunk+=64){
+    const M=[];
+    for(let j=0;j<16;j++) M[j] = dv.getUint32(chunk+j*4, true);
+    let A=a0,B=b0,C=c0,D=d0;
+    for(let i=0;i<64;i++){
+      let F,g;
+      if(i<16){ F=(B&C)|((~B)&D); g=i; }
+      else if(i<32){ F=(D&B)|((~D)&C); g=(5*i+1)%16; }
+      else if(i<48){ F=B^C^D; g=(3*i+5)%16; }
+      else { F=C^(B|(~D)); g=(7*i)%16; }
+      F = (F + A + K[i] + M[g]) >>> 0;
+      A=D; D=C; C=B;
+      B = (B + rotl(F,S[i])) >>> 0;
+    }
+    a0=(a0+A)>>>0; b0=(b0+B)>>>0; c0=(c0+C)>>>0; d0=(d0+D)>>>0;
+  }
+  return toHexLE(a0)+toHexLE(b0)+toHexLE(c0)+toHexLE(d0);
+}
+
+async function sha(algo, str){
+  const buf = new TextEncoder().encode(str);
+  const digest = await crypto.subtle.digest(algo, buf);
+  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function runHash(){
+  const text = document.getElementById('hash-in').value;
+  const rows = document.getElementById('hash-rows');
+  rows.innerHTML = '';
+  const results = [
+    { label:'MD5', value: md5(text) },
+    { label:'SHA-1', value: await sha('SHA-1', text) },
+    { label:'SHA-256', value: await sha('SHA-256', text) },
+    { label:'SHA-384', value: await sha('SHA-384', text) },
+    { label:'SHA-512', value: await sha('SHA-512', text) },
+  ];
+  results.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'hash-row';
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'label';
+    const labelSpan = document.createElement('span'); labelSpan.textContent = r.label;
+    const btn = document.createElement('button'); btn.textContent='salin';
+    btn.onclick = ()=>{ navigator.clipboard && navigator.clipboard.writeText(r.value).catch(()=>{}); };
+    labelDiv.appendChild(labelSpan); labelDiv.appendChild(btn);
+    const valDiv = document.createElement('div'); valDiv.className='val'; valDiv.textContent = r.value;
+    row.appendChild(labelDiv); row.appendChild(valDiv);
+    rows.appendChild(row);
+  });
+  document.getElementById('hash-status').textContent = 'Hash dihitung ✓';
+}
+
+// init
+runUuid();
+document.getElementById('hash-in').value = 'Halo, Bandung!';
+runHash();
+</script>
+</body>
+</html>
