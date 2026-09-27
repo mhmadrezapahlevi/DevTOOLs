@@ -1,7 +1,5 @@
 # DevTools
 
-Kumpulan tool developer sehari-hari — formatter, converter, generator, dan checker — dibuat sebagai pengganti [freeformatter.com](https://www.freeformatter.com) yang sudah tidak aktif.
-
 **Demo langsung:** https://mhmadrezapahlevi.github.io/DevTOOLs/
 
 Semua tool berjalan **100% di browser** (client-side). Tidak ada backend, tidak ada data yang dikirim atau disimpan di server mana pun — file JSON, teks, atau kode yang Anda proses tidak pernah meninggalkan perangkat Anda.
