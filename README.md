@@ -1,46 +1,46 @@
 # DevTools
 
-**Demo langsung:** https://mhmadrezapahlevi.github.io/DevTOOLs/
+**Live demo:** https://mhmadrezapahlevi.github.io/DevTOOLs/
 
-Semua tool berjalan **100% di browser** (client-side). Tidak ada backend, tidak ada data yang dikirim atau disimpan di server mana pun — file JSON, teks, atau kode yang Anda proses tidak pernah meninggalkan perangkat Anda.
+All tools run **100% in the browser** (client-side). There is no backend, and no data is sent to or stored on any server — the JSON, text, or code files you process never leave your device.
 
-## Daftar Tool
+## List of Tools
 
-| Tool | File | Fitur |
+| Tool | File | Features |
 |---|---|---|
-| 🧩 JSON Toolkit | `json-toolkit.html` | Format & validasi JSON, minify, konversi JSON→XML, JSON→CSV |
-| 🔐 Encoder / Decoder | `encode-decode.html` | Base64, URL, HTML entity — encode & decode dua arah |
-| 🔑 UUID & Hash Generator | `uuid-hash.html` | Generate UUID v4 massal, hitung MD5, SHA-1, SHA-256, SHA-384, SHA-512 |
-| 🛠️ Formatter Kode | `code-formatter.html` | Rapikan XML, CSS, JavaScript, dan SQL |
-| 📝 Markdown & YAML | `markdown-yaml.html` | Pratinjau Markdown → HTML, konversi YAML ↔ JSON |
-| 🔍 Diff Checker | `diff-checker.html` | Bandingkan dua teks atau JSON baris demi baris |
-| ⏱️ Timestamp, Lorem & Regex | `timestamp-lorem-regex.html` | Konversi Unix timestamp ↔ tanggal, generator Lorem Ipsum, penguji regex |
+| 🧩 JSON Toolkit | `json-toolkit.html` | Format & validate JSON, minify, convert JSON→XML, JSON→CSV |
+| 🔐 Encoder / Decoder | `encode-decode.html` | Base64, URL, HTML entity — two-way encode & decode |
+| 🔑 UUID & Hash Generator | `uuid-hash.html` | Generate UUID v4 in bulk, compute MD5, SHA-1, SHA-256, SHA-384, SHA-512 |
+| 🛠️ Code Formatter | `code-formatter.html` | Format XML, CSS, JavaScript, and SQL |
+| 📝 Markdown & YAML | `markdown-yaml.html` | Markdown → HTML preview, YAML ↔ JSON conversion |
+| 🔍 Diff Checker | `diff-checker.html` | Compare two texts or JSON line by line |
+| ⏱️ Timestamp, Lorem & Regex | `timestamp-lorem-regex.html` | Convert Unix timestamp ↔ date, Lorem Ipsum generator, regex tester |
 
-Halaman utama (`index.html`) menautkan ke semua tool di atas.
+The main page (`index.html`) links to all the tools above.
 
-## Menjalankan secara lokal
+## Running Locally
 
-Tidak perlu instalasi apa pun — cukup buka salah satu file `.html` langsung di browser:
+No installation is required — simply open any `.html` file directly in your browser:
 
 ```bash
 git clone https://github.com/mhmadrezapahlevi/DevTOOLs.git
 cd DevTOOLs
-# buka index.html di browser, atau jalankan local server:
+# open index.html in your browser, or run a local server:
 python -m http.server 8000
 ```
 
-Lalu akses `http://localhost:8000`.
+Then go to `http://localhost:8000`.
 
-## Teknologi
+## Technologies
 
-Setiap tool adalah file HTML mandiri (vanilla JavaScript), dengan beberapa library open-source yang dimuat dari CDN untuk fitur tertentu:
+Each tool is a standalone HTML file (vanilla JavaScript), with several open-source libraries loaded from a CDN for certain features:
 
-- [marked.js](https://marked.js.org/) — rendering Markdown
-- [js-yaml](https://github.com/nodeca/js-yaml) — parsing/serialisasi YAML
-- [js-beautify](https://github.com/beautify-web/js-beautify) — format CSS & JavaScript
+- [marked.js](https://marked.js.org/) — Markdown rendering
+- [js-yaml](https://github.com/nodeca/js-yaml) — YAML parsing/serialization
+- [js-beautify](https://github.com/beautify-web/js-beautify) — CSS & JavaScript formatting
 
-Sisanya (JSON handling, Base64/URL/HTML encoding, MD5, UUID, diff, SQL formatter, dll) ditulis native tanpa dependency, dan Web Crypto API browser dipakai untuk hash SHA-1/256/384/512.
+The rest (JSON handling, Base64/URL/HTML encoding, MD5, UUID, diff, SQL formatter, etc.) is written natively without dependencies, and the browser's Web Crypto API is used for SHA-1/256/384/512 hashing.
 
-## Lisensi
+## License
 
-MIT — lihat [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
